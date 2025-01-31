@@ -1,8 +1,9 @@
-'use strict'
+'use strict';
 
-const path = require('path')
-const autoprefixer = require('autoprefixer')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const webpack = require('webpack');
+const path = require('path');
+const autoprefixer = require('autoprefixer');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -14,9 +15,18 @@ module.exports = {
   devServer: {
     static: path.resolve(__dirname, 'dist'),
     port: 8888,
-    hot: true
+    hot: true,
+    client: {
+      logging: 'error', // Suppress client-side logs except errors
+    },
+  },
+  infrastructureLogging: {
+    level: 'error', // Suppress infrastructure logging
   },
   plugins: [
+    new webpack.WatchIgnorePlugin({
+      paths: [/\.js$/, /\.d\.ts$/] // Add paths to ignore here
+    }),
     new HtmlWebpackPlugin({ template: './src/index.html' })
   ],
   module: {
@@ -25,17 +35,17 @@ module.exports = {
         test: /\.(scss)$/,
         use: [
           {
-            //Adds CSS to the DOM by injecting a '<style>' tag
+            // Adds CSS to the DOM by injecting a '<style>' tag
             loader: 'style-loader'
           },
           {
-            //Interprets '@import' and 'url()' like 'import/require()' and will resolve them
+            // Interprets '@import' and 'url()' like 'import/require()' and will resolve them
             loader: 'css-loader'
           },
           {
-            //Loader for webpack to process CSS with PostCSS
+            // Loader for webpack to process CSS with PostCSS
             loader: 'postcss-loader',
-            options:{
+            options: {
               postcssOptions: {
                 plugins: [
                   autoprefixer
@@ -44,11 +54,26 @@ module.exports = {
             }
           },
           {
-            //Loads a SASS/SCSS file and compiles it to CSS
-            loader: 'sass-loader'
+            // Loads a SASS/SCSS file and compiles it to CSS
+            loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                quietDeps: true // Suppress deprecation warnings
+              }
+            }
           }
         ]
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
       }
     ]
   }
-}
+};

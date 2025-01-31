@@ -1,3 +1,4 @@
-// Import all of Bootstrap's CSS
-@use "bootstrap" as *;
+// Import Bootstrap's SCSS using @use
+@use 'bootstrap' as *;
 
+// Your custom styles
